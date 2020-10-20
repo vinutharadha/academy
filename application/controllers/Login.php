@@ -7,6 +7,7 @@ class Login extends CI_Controller {
     {
         parent::__construct();
         // Your own constructor code
+        include_once './vendor/autoload.php';
         $this->load->database();
         $this->load->library('session');
         /*cache control*/
@@ -87,6 +88,10 @@ class Login extends CI_Controller {
         $validity = $this->user_model->check_duplication('on_create', $data['email']);
         if ($validity) {
             $user_id = $this->user_model->register_user($data);
+            // Sending email
+            $this->mailer->to($data['email'])->subject("Enter your email subject")
+            ->send("your_email_template.php");
+            // end sending email
             $this->session->set_userdata('user_login', '1');
             $this->session->set_userdata('user_id', $user_id);
             $this->session->set_userdata('role_id', 2);

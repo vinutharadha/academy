@@ -277,4 +277,27 @@ class User_model extends CI_Model {
         $this->db->where('id', $user_id);
         $this->db->update('users', $data);
     }
+
+    public function send_mail($data)
+    {
+        $this->config->config['mail_config'];
+        $this->load->library('email');
+        
+        $from = $this->config->item('smtp_user');
+        $to = $data['email'];
+        $subject = 'subject';
+        $message = 'message';
+
+        $this->email->set_newline("\r\n");
+        $this->email->from($from);
+        $this->email->to($to);
+        $this->email->subject($subject);
+        $this->email->message($message);
+
+        if ($this->email->send()) {
+            return 'Your Email has successfully been sent.';
+        } else {
+            return $this->email->print_debugger();
+        }
+    }
 }
