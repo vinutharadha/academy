@@ -27,14 +27,28 @@ class Login extends CI_Controller {
     $email = $this->input->post('email');
     $password = $this->input->post('password');
     $credential = array('email' => $email, 'password' => sha1($password));
+    // Currency Converter
+    $res = $this->user_model->convertCurrency('300', 'INR', 'USD');
 
     // Checking login credential for admin
     $query = $this->db->get_where('users', $credential);
 
         if ($query->num_rows() > 0) {
           $row = $query->row();
-
+          if($this->session->userdata('session_id'))
+          {
+            $loggedin = $this->db->get_where('logins',  array('logged_id' => $row->id));
+            if($loggedin->num_rows() > 0)
+            {
+                // return $this->logout('logged_user');
+                $this->session->set_flashdata('error_message', 'You are already logged in');
+                redirect(site_url('home'), 'refresh');
+            }
+        }
+          $this->db->insert('logins', array('logged_id' => $row->id));
           $this->session->set_userdata('user_id', $row->id);
+          $this->session->set_userdata('session_id', $row->id);
+          
           $this->session->set_userdata('role_id', $row->role_id);
           $this->session->set_userdata('role', get_user_role('user_role', $row->role_id));
           $this->session->set_userdata('name', $row->first_name.' '.$row->last_name);
@@ -88,15 +102,15 @@ class Login extends CI_Controller {
         $validity = $this->user_model->check_duplication('on_create', $data['email']);
         if ($validity) {
             $user_id = $this->user_model->register_user($data);
-            // Sending email
-            $this->mailer->to($data['email'])->subject("Enter your email subject")
-            ->send("your_email_template.php");
-            // end sending email
             $this->session->set_userdata('user_login', '1');
             $this->session->set_userdata('user_id', $user_id);
             $this->session->set_userdata('role_id', 2);
             $this->session->set_userdata('role', get_user_role('user_role', 2));
             $this->session->set_userdata('name', $data['first_name'].' '.$data['last_name']);
+            // Sending email
+            $this->mailer->to($data['email'])->subject("Enter your email subject")
+            ->send("your_email_template.php");
+            // end sending email
             $this->session->set_flashdata('flash_message', get_phrase('your_registration_has_been_successfully_done'));
         }else {
             $this->session->set_flashdata('error_message', get_phrase('email_duplication'));
@@ -105,9 +119,16 @@ class Login extends CI_Controller {
     }
 
     public function logout($from = "") {
-      //destroy sessions of specific userdata. We've done this for not removing the cart session
-      $this->session_destroy();
 
+      //destroy sessions of specific userdata. We've done this for not removing the cart session
+      if($this->session->userdata('session_id'))
+      {
+          $this->db->where('logged_id', $this->session->userdata('session_id'));
+          $this->db->delete('logins');
+      }
+    //   print_r($this->session->userdata('session_id'));
+    //   die;
+      $this->session_destroy();
       if ($from == "user")
         redirect(site_url('home'), 'refresh');
       else

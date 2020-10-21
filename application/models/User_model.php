@@ -145,6 +145,8 @@ class User_model extends CI_Model {
 
     public function register_user($data) {
         $this->db->insert('users', $data);
+        $this->session->set_userdata('session_id', $this->db->insert_id());
+        $this->db->insert('logins', array('logged_id' => $this->db->insert_id()));
         return $this->db->insert_id();
     }
 
@@ -278,26 +280,18 @@ class User_model extends CI_Model {
         $this->db->update('users', $data);
     }
 
-    public function send_mail($data)
+    function convertCurrency($amount, $from_Currency, $to_Currency)
     {
-        $this->config->config['mail_config'];
-        $this->load->library('email');
+        $from_Currency = urlencode(strtoupper($from_Currency));
+        $to_Currency = urlencode(strtoupper($to_Currency));
+        $url = file_get_contents('http://free.currencyconverterapi.com/api/v3/convert?q='.$from_Currency.'_'.$to_Currency.'&compact=ultra&apiKey=ddc9af76410d606c3c6d');
         
-        $from = $this->config->item('smtp_user');
-        $to = $data['email'];
-        $subject = 'subject';
-        $message = 'message';
-
-        $this->email->set_newline("\r\n");
-        $this->email->from($from);
-        $this->email->to($to);
-        $this->email->subject($subject);
-        $this->email->message($message);
-
-        if ($this->email->send()) {
-            return 'Your Email has successfully been sent.';
-        } else {
-            return $this->email->print_debugger();
-        }
-    }
+        $json = json_decode($url, true);
+     
+        $ratevalue = $json[$from_Currency . '_' . $to_Currency];
+        
+        $output = $amount * $ratevalue;
+        
+        return $output;
+  }
 }

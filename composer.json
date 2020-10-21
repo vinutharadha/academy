@@ -12,7 +12,8 @@
 	},
 	"require": {
 		"php": ">=5.3.7",
-		"swiftmailer/swiftmailer": "^6.2"
+		"swiftmailer/swiftmailer": "^6.2",
+		"alessandrominoccheri/codeigniter-currency-converter": "^2.0"
 	},
 	"suggest": {
 		"paragonie/random_compat": "Provides better randomness in PHP 5.x"

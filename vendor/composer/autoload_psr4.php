@@ -21,4 +21,5 @@ return array(
     'Doctrine\\Instantiator\\' => array($vendorDir . '/doctrine/instantiator/src/Doctrine/Instantiator'),
     'Doctrine\\Common\\Lexer\\' => array($vendorDir . '/doctrine/lexer/lib/Doctrine/Common/Lexer'),
     'DeepCopy\\' => array($vendorDir . '/myclabs/deep-copy/src/DeepCopy'),
+    '' => array($vendorDir . '/alessandrominoccheri/codeigniter-currency-converter/libraries', $vendorDir . '/alessandrominoccheri/codeigniter-currency-converter/tests'),
 );
